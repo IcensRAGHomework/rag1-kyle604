@@ -10,15 +10,16 @@ from langchain_core.prompts import ChatPromptTemplate, FewShotChatMessagePromptT
 gpt_chat_version = 'gpt-4o'
 gpt_config = get_model_configuration(gpt_chat_version)
 
+llm = AzureChatOpenAI(
+        model=gpt_config['model_name'],
+        deployment_name=gpt_config['deployment_name'],
+        openai_api_key=gpt_config['api_key'],
+        openai_api_version=gpt_config['api_version'],
+        azure_endpoint=gpt_config['api_base'],
+        temperature=gpt_config['temperature']
+)
+
 def generate_hw01(question):
-    llm = AzureChatOpenAI(
-            model=gpt_config['model_name'],
-            deployment_name=gpt_config['deployment_name'],
-            openai_api_key=gpt_config['api_key'],
-            openai_api_version=gpt_config['api_version'],
-            azure_endpoint=gpt_config['api_base'],
-            temperature=gpt_config['temperature']
-    )
     examples = [
         {"input": "請僅用純JSON格式呈現之後的結果，結果爲Result，日期爲date，紀念日名稱爲name", 
          "output": """{
@@ -51,6 +52,7 @@ def generate_hw01(question):
     return response.content
 
 def generate_hw02(question):
+    #https://calendarific.com/api/v2/holidays?&api_key=NplCnEzX4afR3qpnwFF858d1S05XvzP7&country=TW&year=2024
     pass
     
 def generate_hw03(question2, question3):
@@ -60,14 +62,6 @@ def generate_hw04(question):
     pass
     
 def demo(question):
-    llm = AzureChatOpenAI(
-            model=gpt_config['model_name'],
-            deployment_name=gpt_config['deployment_name'],
-            openai_api_key=gpt_config['api_key'],
-            openai_api_version=gpt_config['api_version'],
-            azure_endpoint=gpt_config['api_base'],
-            temperature=gpt_config['temperature']
-    )
     message = HumanMessage(
             content=[
                 {"type": "text", "text": question},
