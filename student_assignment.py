@@ -6,6 +6,9 @@ from model_configurations import get_model_configuration
 from langchain_openai import AzureChatOpenAI
 from langchain_core.messages import HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, FewShotChatMessagePromptTemplate
+from langchain import hub
+from langchain.agents import AgentExecutor, create_openai_functions_agent
+from langchain_openai import ChatOpenAI
 
 gpt_chat_version = 'gpt-4o'
 gpt_config = get_model_configuration(gpt_chat_version)
@@ -53,7 +56,24 @@ def generate_hw01(question):
 
 def generate_hw02(question):
     #https://calendarific.com/api/v2/holidays?&api_key=NplCnEzX4afR3qpnwFF858d1S05XvzP7&country=TW&year=2024
-    pass
+    instructions = """You are an expert researcher."""
+    base_prompt = hub.pull("langchain-ai/openai-functions-template")
+    prompt = base_prompt.partial(instructions=instructions)
+    from langchain_community.tools.semanticscholar.tool import SemanticScholarQueryRun
+    tools = [SemanticScholarQueryRun()]
+    agent = create_openai_functions_agent(llm, tools, prompt)
+    agent_executor = AgentExecutor(
+        agent=agent,
+        tools=tools,
+        verbose=True,
+    )
+    agent_executor.invoke(
+        {
+            "input": question
+        }
+    )
+    return agent_executor.response
+
     
 def generate_hw03(question2, question3):
     pass
@@ -70,3 +90,5 @@ def demo(question):
     response = llm.invoke([message])
     
     return response
+
+print(generate_hw02("What are some biases in the large language models? How have people tried to mitigate them? "))
