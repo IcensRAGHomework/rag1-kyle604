@@ -4,7 +4,7 @@ import traceback
 from model_configurations import get_model_configuration
 
 from langchain_openai import AzureChatOpenAI
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.prompts import ChatPromptTemplate, FewShotChatMessagePromptTemplate
 from langchain import hub
 from langchain.agents import AgentExecutor, create_openai_functions_agent
@@ -40,30 +40,9 @@ llm = AzureChatOpenAI(
 )
 
 def generate_hw01(question):
-    examples = [
-        {"input": "請僅用純JSON格式呈現之後的結果，結果爲Result，日期爲date，紀念日名稱爲name", 
-         "output": """{
-                "Result": [
-                    {
-                        "date": "2024-02-28",
-                        "name": "和平紀念日"
-                    }
-                ]
-            }"""},
-    ]
-    example_prompt = ChatPromptTemplate.from_messages(
-        [
-            ("human", "{input}"),
-            ("ai", "{output}"),
-        ]
-    )
-    few_shot_prompt = FewShotChatMessagePromptTemplate(
-        example_prompt=example_prompt,
-        examples=examples,
-    )
     final_prompt = ChatPromptTemplate.from_messages(
         [
-            few_shot_prompt,
+            ("system", "請用JSON格式回答問題，不需要markdown標記：結果爲Result，日期爲date，紀念日名稱爲name"),
             ("human", "{input}"),
         ]
     )
@@ -114,6 +93,12 @@ def generate_hw04(question):
         ],
         max_tokens=2000 
     )
+    message = HumanMessage(
+            content=[
+                {"type": "text", "text": "請用純JSON格式呈現之前的結果，結果爲Result"},
+            ]
+    )
+    response = llm.invoke([message])
     return response.content
     
 def demo(question):
@@ -126,4 +111,4 @@ def demo(question):
     
     return response
 
-print(generate_hw04("請問中華台北的積分是多少"))
+print(generate_hw01("2024年台灣10月紀念日有哪些?"))
