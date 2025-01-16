@@ -40,12 +40,10 @@ llm = AzureChatOpenAI(
 )
 
 def generate_hw01(question):
-    final_prompt = ChatPromptTemplate.from_messages(
-        [
+    final_prompt = ChatPromptTemplate([
             ("system", "請用JSON格式回答問題，不需要markdown標記：結果爲Result，日期爲date，紀念日名稱爲name"),
-            ("human", "{input}"),
-        ]
-    )
+            ("user", "{input}"),
+    ])
     chain = final_prompt | llm
     response = chain.invoke({"input": question})
     return response.content
@@ -75,10 +73,12 @@ def generate_hw03(question2, question3):
     pass
     
 def generate_hw04(question):
-    response = llm.invoke(
-        input =[
-            { "role": "system", "content": "You are a helpful assistant." },
-            { "role": "user", "content": [  
+    messages = [
+        SystemMessage(
+            content="請用JSON格式作答，不需要markdown標記，結果爲Result，積分爲Result下的score。"
+        ),
+        HumanMessage(
+            content=[  
                 { 
                     "type": "text", 
                     "text": question
@@ -89,16 +89,10 @@ def generate_hw04(question):
                         "url": local_image_to_data_url("baseball.png")
                     }
                 }
-            ] } 
-        ],
-        max_tokens=2000 
-    )
-    message = HumanMessage(
-            content=[
-                {"type": "text", "text": "請用純JSON格式呈現之前的結果，結果爲Result"},
             ]
-    )
-    response = llm.invoke([message])
+        )
+    ]
+    response = llm.invoke(messages, max_tokens=2000)
     return response.content
     
 def demo(question):
@@ -108,7 +102,6 @@ def demo(question):
             ]
     )
     response = llm.invoke([message])
-    
     return response
 
-print(generate_hw01("2024年台灣10月紀念日有哪些?"))
+print(json.loads(generate_hw01("2024年台灣10月紀念日有哪些?")))
