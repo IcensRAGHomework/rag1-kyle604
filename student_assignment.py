@@ -105,4 +105,7 @@ def demo(question):
     response = llm.invoke([message])
     return response
 
-print(generate_hw01("2024年台灣10月紀念日有哪些?"))
+#print(json.loads(generate_hw01('2024年台灣10月紀念日有哪些?')))
+#print(json.loads(generate_hw02('2024年台灣10月紀念日有哪些?')))
+#print(json.loads(generate_hw03('2024年台灣10月紀念日有哪些?', '根據先前的節日清單，這個節日是否有在該月份清單？{"date": "10-31", "name": "蔣公誕辰紀念日"}')))
+#print(json.loads(generate_hw04('請問中華台北的積分是多少?')))
