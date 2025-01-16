@@ -36,7 +36,8 @@ llm = AzureChatOpenAI(
         openai_api_key=gpt_config['api_key'],
         openai_api_version=gpt_config['api_version'],
         azure_endpoint=gpt_config['api_base'],
-        temperature=gpt_config['temperature']
+        temperature=gpt_config['temperature'],
+        model_kwargs={ "response_format": { "type": "json_object" } }
 )
 
 def generate_hw01(question):
@@ -104,4 +105,4 @@ def demo(question):
     response = llm.invoke([message])
     return response
 
-print(json.loads(generate_hw01("2024年台灣10月紀念日有哪些?")))
+print(generate_hw01("2024年台灣10月紀念日有哪些?"))
