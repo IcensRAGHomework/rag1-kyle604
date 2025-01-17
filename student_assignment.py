@@ -10,7 +10,7 @@ from langchain_core.tools import tool
 from typing import List
 
 from langchain_core.chat_history import BaseChatMessageHistory
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder, HumanMessagePromptTemplate, PromptTemplate
 from pydantic import BaseModel, Field
 from langchain_core.runnables.history import RunnableWithMessageHistory
 
@@ -32,34 +32,36 @@ llm = AzureChatOpenAI(
 )
 
 def generate_hw01(question):
-    final_prompt = ChatPromptTemplate([
+    prompt = ChatPromptTemplate([
             ("system", "請用JSON格式回答問題，不需要markdown標記：結果爲Result，日期爲date，紀念日名稱爲name"),
             ("user", "{input}"),
     ])
-    chain = final_prompt | llm
+    chain = prompt | llm
     response = chain.invoke({"input": question})
     return response.content
 
+@tool
+def get_holidays(country: str, year: int, month: int):
+    """得到指定國家、年份、月份的紀念日列表(JSON格式呈現)"""
+    params = {"country": country, "year": year, "month": month, "api_key": "NplCnEzX4afR3qpnwFF858d1S05XvzP7"}
+    url = "https://calendarific.com/api/v2/holidays"
+    response = requests.get(url, params=params)
+    question = response.text
+    return ChatPromptTemplate([
+        ("system", """請找到holidays下的所有日期和中文名稱，并保存到Result中，如：{"Result": [
+            {
+                "date": "2024-10-10",
+                "name": "國慶日"
+            }]}"""),
+        ("user", question)
+    ])
+
 def generate_hw02(question):
-    instructions = "請用JSON格式作答"
-    base_prompt = hub.pull("langchain-ai/openai-functions-template")
-    prompt = base_prompt.partial(instructions=instructions)
-
-    @tool
-    def get_holidays(country: str, year: int, month: int):
-        """得到指定國家、年份、月份的紀念日列表(JSON格式呈現)"""
-        url = f"https://calendarific.com/api/v2/holidays?&api_key=NplCnEzX4afR3qpnwFF858d1S05XvzP7&country={country}&year={year}&month={month}"
-        response = requests.get(url)
-        question = response.text
-        return ChatPromptTemplate([
-            ("system", """請找到holidays下的所有日期和中文名稱，并保存到Result中，如：{"Result": [
-             {
-                 "date": "2024-10-10",
-                 "name": "國慶日"
-             }]}"""),
-            ("user", question)
-        ])   
-
+    prompt = ChatPromptTemplate([
+        ("system", "Respond in json format."),
+        MessagesPlaceholder(variable_name="agent_scratchpad"),
+        ("user", "{input}"),
+    ])
     tools = [get_holidays]
     agent = create_openai_functions_agent(llm, tools, prompt)
     agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=False)
