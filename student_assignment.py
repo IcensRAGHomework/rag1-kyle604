@@ -2,8 +2,7 @@ from model_configurations import get_model_configuration
 
 from langchain_openai import AzureChatOpenAI
 from langchain_core.runnables.history import RunnableWithMessageHistory
-from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_core.prompts import ChatPromptTemplate, FewShotChatMessagePromptTemplate
+from langchain_core.messages import HumanMessage, SystemMessage, BaseMessage, AIMessage
 from langchain import hub
 from langchain.agents import AgentExecutor, create_openai_functions_agent, create_tool_calling_agent
 from langchain_core.tools import tool
@@ -161,6 +160,7 @@ def demo(question):
     response = llm.invoke([message])
     return response
 
+#import json
 #print(json.loads(generate_hw01('2024年台灣10月紀念日有哪些?')))
 #print(json.loads(generate_hw02('2024年台灣10月紀念日有哪些?')))
 #print(json.loads(generate_hw03('2024年台灣10月紀念日有哪些?', '根據先前的節日清單，這個節日是否有在該月份清單？{"date": "10-31", "name": "蔣公誕辰紀念日"}')))
